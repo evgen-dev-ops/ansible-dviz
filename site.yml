@@ -1,0 +1,59 @@
+---
+- name: Preparing
+  hosts: appservers
+  become: true
+
+  tasks:
+    - name: Preparing name
+      ansible.builtin.debug:
+        msg: "Server {{ ansible_hostname }} work in {{ ansible_distribution }}"
+
+    - name: DownGit
+      ansible.builtin.apt:
+        name: git
+        state: present
+        update_cache: true
+
+    - name: Create app directory
+      ansible.builtin.file:
+        path: "{{ app_directory }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+- name: Preparing balancer
+  hosts: balancers
+  become: true
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Ensure nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+- name: Preparing database
+  hosts: dbservers
+  become: true
+
+  tasks:
+    - name: Install postgresql
+      ansible.builtin.apt:
+        name: postgresql
+        state: present
+        update_cache: true
+
+    - name: Ensure postgresql is running
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+
+
